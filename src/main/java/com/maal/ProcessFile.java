@@ -95,8 +95,7 @@ public class ProcessFile {
         logger.info("Total de linhas processadas: " + totalProcessed);
         executor.shutdown();
     }
-
-    // Método que processa cada linha (simulado)
+    
     private static void processLine(String line){
         // Simula algum processamento
         // Exemplo de processamento: contar palavras na linha
