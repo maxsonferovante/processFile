@@ -10,28 +10,31 @@ import java.util.concurrent.Future;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ProcessFile {
 
     private static final ThreadLocal<Integer> linesProcessed = ThreadLocal.withInitial(() -> 0);
+    private static final Logger logger = Logger.getLogger(String.valueOf(ProcessFile.class));
 
     public static void run(String filePath) {
         int idealThreadCount = calculateIdealThreadCount();
-        System.out.println("Número ideal de threads: " + idealThreadCount);
+        logger.info("Número ideal de threads: " + idealThreadCount);
 
         try {
             List<String> lines = readFile(filePath);
-            System.out.println("Total de linhas a serem processadas: " + lines.size());
+            logger.info("Total de linhas a serem processadas: " + lines.size());
 
             if (lines.isEmpty()) {
-                System.out.println("Nenhuma linha para processar.");
+                logger.info("Nenhuma linha para processar.");
                 return;
             }
-            System.out.println("Iniciando o processamento em paralelo...");
+            logger.info("Iniciando o processamento em paralelo...");
 
             processLinesInParallel(lines, idealThreadCount);
         }catch (IOException e){
-            System.err.println("Erro ao ler o arquivo: " + e.getMessage());
+            logger.log(Level.SEVERE, "Erro ao ler o arquivo", e);
         }
         finally {
             linesProcessed.remove();
@@ -83,23 +86,23 @@ public class ProcessFile {
         for (Future<Integer> future : futures) {
             try {
                 totalProcessed += future.get();
-                System.out.println("Thread processou: " + future.get() + " linhas");
+                logger.info("Thread processou: " + future.get() + " linhas");
             } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+                logger.log(Level.SEVERE, "Erro durante o processamento paralelo", e);
             }
         }
 
-        System.out.println("Total de linhas processadas: " + totalProcessed);
+        logger.info("Total de linhas processadas: " + totalProcessed);
         executor.shutdown();
     }
 
     // Método que processa cada linha (simulado)
-    private static void processLine(String line) throws InterruptedException {
+    private static void processLine(String line){
         // Simula algum processamento
         // Exemplo de processamento: contar palavras na linha
         int wordCount = line.split("\\s+").length;
         String message = Thread.currentThread().getName() + " processou: '" + line + "' (" + wordCount + " palavras)";
-        System.out.println(message);
+        logger.info(message);
 
     }
 }
