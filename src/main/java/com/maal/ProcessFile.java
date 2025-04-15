@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 
 public class ProcessFile {
 
-    private static final ThreadLocal<Integer> linesProcessed = ThreadLocal.withInitial(() -> 0);
     private static final Logger logger = Logger.getLogger(String.valueOf(ProcessFile.class));
 
     public static void run(String filePath) {
@@ -33,11 +32,10 @@ public class ProcessFile {
             logger.info("Iniciando o processamento em paralelo...");
 
             processLinesInParallel(lines, idealThreadCount);
+            lines.clear();
+            logger.info("Processamento finalizado com sucesso!");
         }catch (IOException e){
             logger.log(Level.SEVERE, "Erro ao ler o arquivo", e);
-        }
-        finally {
-            linesProcessed.remove();
         }
     }
     private static int calculateIdealThreadCount() {
@@ -74,7 +72,6 @@ public class ProcessFile {
                     processLine(line); // Processa a linha
                     localCount++;
                 }
-                linesProcessed.set(localCount); // Armazena no ThreadLocal
                 return localCount;
             };
 
