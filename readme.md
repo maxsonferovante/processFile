@@ -1,65 +1,132 @@
-# ProcessFile
+# 📂 ProcessFile - Processamento Paralelo de Arquivos em Java
 
-Este projeto é uma aplicação Java que processa arquivos de texto em paralelo, utilizando threads para otimizar o desempenho. Ele divide o trabalho entre múltiplas threads, processa cada linha do arquivo e exibe informações sobre o processamento.
+Este projeto demonstra **duas abordagens distintas** para o processamento de arquivos de texto em Java, com foco em **paralelismo e desempenho**. Ideal para aplicações que precisam lidar com grandes volumes de dados, o projeto mostra como dividir o trabalho entre múltiplas threads de forma eficiente.
 
-## Estrutura do Projeto
+---
 
-- **`Main.java`**: Classe principal que inicia a execução do programa. Define o caminho do arquivo a ser processado e chama o método `run` da classe `ProcessFile`.
-- **`ProcessFile.java`**: Contém a lógica principal para leitura do arquivo, divisão do trabalho entre threads e processamento das linhas.
+## 🧠 Objetivo
 
-## Funcionamento
+Explorar duas formas de processar arquivos linha a linha em Java:
 
-1. **Leitura do Arquivo**:  
-   O arquivo de texto é lido linha por linha e armazenado em uma lista.
+1. **Abordagem Tradicional**: leitura completa do arquivo na memória.
+2. **Abordagem Sob Demanda (Streaming)**: leitura em fluxo com processamento paralelo usando fila (`BlockingQueue`).
 
-2. **Cálculo de Threads Ideais**:  
-   O número ideal de threads é calculado com base no número de processadores disponíveis na máquina, garantindo pelo menos 2 threads.
+---
 
-3. **Processamento em Paralelo**:
-    - As linhas do arquivo são divididas em lotes, e cada lote é atribuído a uma thread.
-    - Cada thread processa suas linhas e armazena o número de linhas processadas em uma variável `ThreadLocal`.
+## 📁 Estrutura do Projeto
 
-4. **Exibição de Resultados**:
-    - O programa exibe o número de linhas processadas por cada thread.
-    - Exibe o total de linhas processadas ao final.
+```
+src/
+├── Main.java
+├── ProcessFile.java                  # Implementação da abordagem tradicional
+└── StreamParallelProcessor.java      # Implementação com leitura sob demanda
+```
 
-5. **Simulação de Processamento**:  
-   O método `processLine` simula o processamento de cada linha, contando o número de palavras e exibindo uma mensagem.
+---
 
-## Como Executar
+## 🧪 Caso 1 — Abordagem Tradicional
 
-1. Certifique-se de que o Gradle está instalado.
-2. Coloque o arquivo de texto a ser processado no caminho `src/main/resources/rockyou.txt`.
-3. Compile e execute o projeto:
+### Como funciona:
+
+1. Lê o **arquivo inteiro para a memória**.
+2. Divide as linhas em blocos para múltiplas threads.
+3. Cada thread processa suas linhas (conta palavras, por exemplo).
+4. Ao final, exibe os resultados por thread e o total processado.
+
+### Quando usar:
+
+✅ Arquivos pequenos/médios  
+✅ Processamento simples e rápido  
+❌ Pode estourar a memória com arquivos grandes
+
+### Exemplo de Saída:
+
+```plaintext
+Número ideal de threads: 8
+Total de linhas a serem processadas: 14344391
+Tempo total de execução: PT2.066665223S
+```
+
+---
+
+## 🚀 Caso 2 — Abordagem Sob Demanda (Streaming com Produtor-Consumidor)
+
+### Como funciona:
+
+1. O arquivo é lido **linha a linha, em tempo real** (streaming).
+2. Um "produtor" agrupa as linhas em lotes e envia para uma `BlockingQueue`.
+3. Múltiplas threads "consumidoras" processam esses lotes em paralelo.
+4. Um sinal especial (`Poison Pill`) encerra as threads no final.
+
+### Quando usar:
+
+✅ Arquivos grandes  
+✅ Leitura eficiente com baixo uso de memória  
+✅ Processamento contínuo e paralelizado  
+⚠️ Maior complexidade de código
+
+### Exemplo de Saída:
+
+```plaintext
+Iniciando processamento paralelo do arquivo: src/main/resources/rockyou.txt com 8 threads.
+Processamento finalizado com sucesso! Total de linhas processadas: 14344391
+Tempo total de execução: PT1.046596379S
+```
+
+---
+
+## ⚙️ Como Executar
+
+1. Certifique-se de ter **Java 21+** e **Gradle** instalados.
+2. Coloque o arquivo `.txt` em `src/main/resources/rockyou.txt`.
+3. Para rodar a abordagem tradicional:
+
    ```bash
    ./gradlew run
    ```
 
-## Exemplo de Saída
+4. Para rodar a abordagem sob demanda, altere o `Main.java`:
 
-```plaintext
-Número ideal de threads: 4
-Total de linhas a serem processadas: 100
-Iniciando o processamento em paralelo...
-Thread-1 processou: 'linha exemplo 1' (3 palavras)
-Thread-2 processou: 'linha exemplo 2' (4 palavras)
-...
-Thread processou: 25 linhas
-Thread processou: 25 linhas
-Total de linhas processadas: 100
-```
+   ```java
+   StreamParallelProcessor.run("src/main/resources/rockyou.txt");
+   ```
 
-## Requisitos
+   E execute novamente:
 
-- **Java 21+**
-- **Gradle**
+   ```bash
+   ./gradlew run
+   ```
 
-## Observações
+---
 
-- O arquivo `rockyou.txt` deve estar no formato de texto simples.
-- O programa utiliza um pool de threads fixo para evitar sobrecarga no sistema.
+## 🧩 Comparativo das Abordagens
 
-## Melhorias Futuras
+| Característica                         | Tradicional                      | Streaming com Fila (Prod/Cons)  |
+|---------------------------------------|----------------------------------|----------------------------------|
+| Carregamento do Arquivo               | Todo na memória                  | Linha a linha                    |
+| Uso de Memória                        | Alto                             | Baixo                            |
+| Complexidade de Implementação         | Baixa                            | Alta                             |
+| Performance em Arquivos Pequenos      | Muito boa                        | Boa                              |
+| Performance em Arquivos Grandes       | Ruim                             | Muito boa                        |
+| Modelo de Execução                    | `ExecutorService` + `Future`     | `BlockingQueue` + consumidores   |
 
-- Adicionar suporte para arquivos maiores que a memória disponível.
-- Permitir configuração dinâmica do número de threads.
+---
+
+## 📌 Requisitos
+
+- Java 21 ou superior
+- Gradle
+- Terminal compatível (Linux/macOS/Windows com bash ou PowerShell)
+
+---
+
+## 📈 Melhorias Futuras
+
+- Métricas de tempo por thread
+- UI com progress bar para arquivos longos
+- Escolha de modo de execução via CLI
+- Exportar logs para arquivo externo
+
+---
+
+Feito com 💻 e ☕ por desenvolvedores que curtem ver o CPU trabalhando bem!
