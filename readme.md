@@ -1,10 +1,10 @@
-# 📂 ProcessFile - Processamento Paralelo de Arquivos em Java
+# ProcessFile - Processamento Paralelo de Arquivos em Java
 
 Este projeto demonstra **duas abordagens distintas** para o processamento de arquivos de texto em Java, com foco em **paralelismo e desempenho**. Ideal para aplicações que precisam lidar com grandes volumes de dados, o projeto mostra como dividir o trabalho entre múltiplas threads de forma eficiente.
 
 ---
 
-## 🧠 Objetivo
+## Objetivo
 
 Explorar duas formas de processar arquivos linha a linha em Java:
 
@@ -13,7 +13,7 @@ Explorar duas formas de processar arquivos linha a linha em Java:
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 src/
@@ -24,7 +24,7 @@ src/
 
 ---
 
-## 🧪 Caso 1 — Abordagem Tradicional
+## Caso 1 — Abordagem Tradicional
 
 ### Como funciona:
 
@@ -87,7 +87,7 @@ Tempo total de execução: PT1.046596379S
    ```
 ---
 
-## 🧩 Comparativo das Abordagens
+## Comparativo das Abordagens
 
 | Característica                         | Tradicional                      | Streaming com Fila (Prod/Cons)  |
 |---------------------------------------|----------------------------------|----------------------------------|
@@ -100,7 +100,7 @@ Tempo total de execução: PT1.046596379S
 
 ---
 
-## 📌 Requisitos
+## Requisitos
 
 - Java 21 ou superior
 - Gradle
