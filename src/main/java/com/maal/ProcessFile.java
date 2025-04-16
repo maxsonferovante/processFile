@@ -1,5 +1,7 @@
 package com.maal;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
@@ -12,39 +14,34 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-public class ProcessFile {
-
-    private static final Logger logger = Logger.getLogger(String.valueOf(ProcessFile.class));
-
-    public static void run(String filePath) {
+class ProcessFile implements FileProcessor {
+    @Override
+    public void run(String filePath) {
+        LocalDateTime startTime = LocalDateTime.now();
         int idealThreadCount = calculateIdealThreadCount();
-        logger.info("Número ideal de threads: " + idealThreadCount);
+        logInfo("Número ideal de threads: " + idealThreadCount);
 
         try {
             List<String> lines = readFile(filePath);
-            logger.info("Total de linhas a serem processadas: " + lines.size());
+            logInfo("Total de linhas a serem processadas: " + lines.size());
 
             if (lines.isEmpty()) {
-                logger.info("Nenhuma linha para processar.");
+                logInfo("Nenhuma linha para processar.");
                 return;
             }
-            logger.info("Iniciando o processamento em paralelo...");
+            logInfo("Iniciando o processamento em paralelo...");
 
             processLinesInParallel(lines, idealThreadCount);
             lines.clear();
-            logger.info("Processamento finalizado com sucesso!");
-        }catch (IOException e){
-            logger.log(Level.SEVERE, "Erro ao ler o arquivo", e);
+            logInfo("Processamento finalizado com sucesso!");
+        } catch (IOException e) {
+            logError("Erro ao ler o arquivo", e);
+        } finally {
+            logInfo("Tempo total de execução: " + Duration.between(startTime, LocalDateTime.now()));
         }
     }
-    private static int calculateIdealThreadCount() {
-        int availableProcessors = Runtime.getRuntime().availableProcessors();
-        return Math.max(2, availableProcessors); // Pelo menos 2 threads
-    }
 
-
-    private static List<String> readFile(String filePath) throws IOException {
+    private List<String> readFile(String filePath) throws IOException {
         List<String> lines = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -54,22 +51,21 @@ public class ProcessFile {
         }
         return lines;
     }
-    private static void processLinesInParallel(List<String> lines, int threadCount) {
+
+    private void processLinesInParallel(List<String> lines, int threadCount) {
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
         List<Future<Integer>> futures = new ArrayList<>();
 
-        // Divide o trabalho entre as threads
         int batchSize = lines.size() / threadCount;
         for (int i = 0; i < threadCount; i++) {
             int start = i * batchSize;
             int end = (i == threadCount - 1) ? lines.size() : start + batchSize;
             List<String> subList = lines.subList(start, end);
 
-            // Cria uma tarefa Callable para cada thread
             Callable<Integer> task = () -> {
                 int localCount = 0;
                 for (String line : subList) {
-                    processLine(line); // Processa a linha
+                    processLine(line);
                     localCount++;
                 }
                 return localCount;
@@ -78,27 +74,21 @@ public class ProcessFile {
             futures.add(executor.submit(task));
         }
 
-        // Coleta os resultados
         int totalProcessed = 0;
         for (Future<Integer> future : futures) {
             try {
                 totalProcessed += future.get();
-                logger.info("Thread processou: " + future.get() + " linhas");
             } catch (InterruptedException | ExecutionException e) {
-                logger.log(Level.SEVERE, "Erro durante o processamento paralelo", e);
+                logError("Erro durante o processamento paralelo", e);
             }
         }
 
-        logger.info("Total de linhas processadas: " + totalProcessed);
+        logInfo("Total de linhas processadas: " + totalProcessed);
         executor.shutdown();
     }
 
-    private static void processLine(String line){
-        // Simula algum processamento
-        // Exemplo de processamento: contar palavras na linha
+    private void processLine(String line) {
         int wordCount = line.split("\\s+").length;
-        String message = Thread.currentThread().getName() + " processou: '" + line + "' (" + wordCount + " palavras)";
-        logger.info(message);
-
+//        logInfo(Thread.currentThread().getName() + " processou: '" + line + "' (" + wordCount + " palavras)");
     }
 }
