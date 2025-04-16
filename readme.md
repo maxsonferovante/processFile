@@ -78,25 +78,13 @@ Tempo total de execução: PT1.046596379S
 ## ⚙️ Como Executar
 
 1. Certifique-se de ter **Java 21+** e **Gradle** instalados.
-2. Coloque o arquivo `.txt` em `src/main/resources/rockyou.txt`.
-3. Para rodar a abordagem tradicional:
+2. Baixe o arquivo [rockyou.txt](https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt) 
+3. Coloque o arquivo `.txt` em `src/main/resources/rockyou.txt`.
+4. Execute para obter os resultados:
 
    ```bash
    ./gradlew run
    ```
-
-4. Para rodar a abordagem sob demanda, altere o `Main.java`:
-
-   ```java
-   StreamParallelProcessor.run("src/main/resources/rockyou.txt");
-   ```
-
-   E execute novamente:
-
-   ```bash
-   ./gradlew run
-   ```
-
 ---
 
 ## 🧩 Comparativo das Abordagens
@@ -119,14 +107,3 @@ Tempo total de execução: PT1.046596379S
 - Terminal compatível (Linux/macOS/Windows com bash ou PowerShell)
 
 ---
-
-## 📈 Melhorias Futuras
-
-- Métricas de tempo por thread
-- UI com progress bar para arquivos longos
-- Escolha de modo de execução via CLI
-- Exportar logs para arquivo externo
-
----
-
-Feito com 💻 e ☕ por desenvolvedores que curtem ver o CPU trabalhando bem!
